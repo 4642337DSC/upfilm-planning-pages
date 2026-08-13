@@ -95,6 +95,17 @@
   }
   .bible-card p { margin: 0; font-size: 14px; }
   .bible-card .site { margin-top: 8px; font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
+  .bible-field {
+    width: 100%; min-height: 130px; resize: vertical;
+    font-family: var(--font-body); font-size: 14px; line-height: 1.5; color: var(--ink);
+    background: transparent; border: 1px solid transparent; border-radius: 8px;
+    padding: 6px 8px; margin: -6px -8px;
+  }
+  .bible-field:hover { border-color: var(--border-2); }
+  .bible-field:focus { outline: none; border-color: var(--accent); background: var(--surface-2); }
+  .bible-field.saving { opacity: 0.6; }
+  #bibleStatus.err { color: var(--gate); background: var(--gate-wash); }
+  #bibleStatus.ok { color: var(--status-active); background: var(--status-active-wash); }
 
   /* Main layout: videos-in-planning (left, wide) + sidebar (right, projects + topics) */
   .layout { display: grid; grid-template-columns: 1.7fr 1fr; gap: 24px; align-items: start; }
@@ -172,19 +183,19 @@
 <div class="shell">
 
   <section>
-    <p class="section-label">Profil client <span class="soon-tag">editare live — în curând</span></p>
+    <p class="section-label">Profil client <span id="bibleStatus" class="soon-tag">se sincronizează cu Notion</span></p>
     <div class="bible-card">
       <div>
         <h3>Domeniu de expertiză</h3>
-        <p>Producător și furnizor de materiale de izolație suflată (injectată) în România: Isofiber (fibră de celuloză din hârtie reciclată, tratată cu săruri borice) și Isofulg (vată bazaltică suflată), plus fibră de lemn premium importată (Schneider Bestwood). Mesajul central: aplicarea suflată elimină punțile termice și golurile de montaj pe care plăcile/saltelele le lasă.</p>
+        <textarea class="bible-field" data-field="Area of expertise">Producător și furnizor de materiale de izolație suflată (injectată) în România: Isofiber (fibră de celuloză din hârtie reciclată, tratată cu săruri borice) și Isofulg (vată bazaltică suflată), plus fibră de lemn premium importată (Schneider Bestwood). Mesajul central: aplicarea suflată elimină punțile termice și golurile de montaj pe care plăcile/saltelele le lasă — poziționează calitatea montajului la fel de important ca și coeficientul termic al materialului. Oferă un calculator online de dimensionare (izogreen.eu) și produce conținut tehnic explicativ, inclusiv interviuri tip podcast, și participă la evenimente de profil (nZEB Expo).</textarea>
       </div>
       <div>
         <h3>Public țintă</h3>
-        <p>Proprietari/autoconstructori și echipele lor care construiesc case nZEB sau pasive (structură din lemn, metal sau zidărie), plus arhitecți/consultanți întâlniți la evenimente de profil. Public tehnic curios, care compară prețuri.</p>
+        <textarea class="bible-field" data-field="Target audience">Proprietari/autoconstructori și echipele lor care construiesc case nZEB sau pasive (structură din lemn, metal sau zidărie), plus arhitecți/consultanți întâlniți la evenimente de profil. Public tehnic curios, care compară prețuri — conținutul presupune un interes minim în fizica construcțiilor (valori U, bariere de vapori, etanșeitate la aer), nu publicul larg.</textarea>
       </div>
       <div>
         <h3>Ton al vocii</h3>
-        <p>Română, persoana I plural („noi”), registru expert/tehnic-explicativ. Hook-uri de tip mit-bustat sau întrebare retorică, cifre precise, accent pe sănătate și confort, nu doar pe facturi.</p>
+        <textarea class="bible-field" data-field="Tone of voice">Română, persoana I plural („noi”), registru expert/tehnic-explicativ. Hook-uri de tip mit-bustat sau întrebare retorică. Accent puternic pe cifre precise (coeficienți, cm de izolație, lei/m², ore de defazaj termic) — nu generalizează niciodată afirmațiile tehnice. Încadrează produsul ca protecție pentru sănătate/confort, nu doar pentru factura la energie. CTA implicit: „urmărește-ne”, uneori un CTA direct către calculator (izogreen.eu).</textarea>
         <p class="site">isogreen.eu</p>
       </div>
     </div>
@@ -272,9 +283,51 @@
   </div>
 
   <footer class="page-footer">
-    Pagină generată din profilul, proiectele și planul de conținut real al ISOGREEN (2026-08-13). Editarea live, atașările de fișiere/linkuri și sincronizarea cu Notion sunt în lucru.
+    Pagină generată din profilul, proiectele și planul de conținut real al ISOGREEN (2026-08-13). Atașările de fișiere/linkuri, subiectele editabile și generarea scriptului sunt în lucru — profilul de mai sus se salvează deja direct în Notion.
   </footer>
 
 </div>
+
+<script>
+(function () {
+  "use strict";
+  var CLIENT = "isogreen";
+  var statusEl = document.getElementById("bibleStatus");
+
+  function setStatus(text, cls) {
+    statusEl.textContent = text;
+    statusEl.className = cls || "soon-tag";
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll(".bible-field"), function (field) {
+    var lastSaved = field.value;
+    field.addEventListener("blur", function () {
+      var value = field.value;
+      if (value === lastSaved) return; // nothing changed, don't spam a save
+      field.classList.add("saving");
+      setStatus("se salvează…", "soon-tag");
+      fetch("/planning-api/bible-save.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ client: CLIENT, field: field.dataset.field, value: value })
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          field.classList.remove("saving");
+          if (data && data.ok) {
+            lastSaved = value;
+            setStatus("salvat în Notion", "ok");
+          } else {
+            setStatus("eroare la salvare — reîncearcă", "err");
+          }
+        })
+        .catch(function () {
+          field.classList.remove("saving");
+          setStatus("eroare de rețea — reîncearcă", "err");
+        });
+    });
+  });
+})();
+</script>
 </body>
 </html>
