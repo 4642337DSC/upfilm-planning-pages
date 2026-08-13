@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISOGREEN — Content Planning</title>
+<style>
+  :root {
+    --bg:        #f9f9f7;
+    --surface:   #fcfcfb;
+    --surface-2: #f3f2ee;
+    --ink:       #17140f;
+    --muted:     #726c5e;
+    --border:    rgba(23,20,15,0.10);
+    --border-2:  rgba(23,20,15,0.17);
+    --accent:    #5b3fae;
+    --accent-ink:#ffffff;
+    --accent-wash: rgba(91,63,174,0.08);
+    --gate:      #9a6a1f;
+    --gate-wash: rgba(154,106,31,0.10);
+    --status-active: #3d7a5c;
+    --status-active-wash: rgba(61,122,92,0.10);
+    --status-hold: #a3671e;
+    --status-hold-wash: rgba(163,103,30,0.10);
+    --status-done: #5b6a8a;
+    --status-done-wash: rgba(91,106,138,0.10);
+    --score-hi: #3d7a5c;
+    --score-mid: #8a7a3d;
+    --score-lo: #a3541e;
+
+    --font-display: "Acre", -apple-system, "Segoe UI Semibold", "Helvetica Neue", Arial, sans-serif;
+    --font-body:    "Acre", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    --font-mono:    "Cascadia Code", "SF Mono", Consolas, "Roboto Mono", ui-monospace, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:        #0d0d0c;
+      --surface:   #1a1a18;
+      --surface-2: #232320;
+      --ink:       #f1efe9;
+      --muted:     #9a9488;
+      --border:    rgba(255,255,255,0.10);
+      --border-2:  rgba(255,255,255,0.18);
+      --accent:    #8f7fe0;
+      --accent-ink:#0d0d0c;
+      --accent-wash: rgba(143,127,224,0.14);
+      --gate:      #d9a94a;
+      --gate-wash: rgba(217,169,74,0.13);
+      --status-active: #6fbf96;
+      --status-active-wash: rgba(111,191,150,0.14);
+      --status-hold: #d9a15a;
+      --status-hold-wash: rgba(217,161,90,0.14);
+      --status-done: #93a3c9;
+      --status-done-wash: rgba(147,163,201,0.14);
+      --score-hi: #6fbf96;
+      --score-mid: #cbb96b;
+      --score-lo: #d98a5a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:        #0d0d0c;
+    --surface:   #1a1a18;
+    --surface-2: #232320;
+    --ink:       #f1efe9;
+    --muted:     #9a9488;
+    --border:    rgba(255,255,255,0.10);
+    --border-2:  rgba(255,255,255,0.18);
+    --accent:    #8f7fe0;
+    --accent-ink:#0d0d0c;
+    --accent-wash: rgba(143,127,224,0.14);
+    --gate:      #d9a94a;
+    --gate-wash: rgba(217,169,74,0.13);
+    --status-active: #6fbf96;
+    --status-active-wash: rgba(111,191,150,0.14);
+    --status-hold: #d9a15a;
+    --status-hold-wash: rgba(217,161,90,0.14);
+    --status-done: #93a3c9;
+    --status-done-wash: rgba(147,163,201,0.14);
+    --score-hi: #6fbf96;
+    --score-mid: #cbb96b;
+    --score-lo: #d98a5a;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); }
+
+  .shell { max-width: 1180px; margin: 0 auto; padding: 0 28px 80px; }
+
+  header.top { border-bottom: 1px solid var(--border-2); margin-bottom: 28px; }
+  .top-inner {
+    max-width: 1180px; margin: 0 auto; padding: 22px 28px 20px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .brand .mark { font-family: var(--font-display); font-weight: 600; font-size: 20px; letter-spacing: -0.01em; }
+  .brand .sep { color: var(--muted); }
+  .brand .page-name { font-family: var(--font-display); font-weight: 600; font-size: 20px; letter-spacing: -0.01em; color: var(--muted); }
+  .top-actions { display: flex; align-items: center; gap: 10px; }
+  .gate-badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--font-display); font-weight: 600; font-size: 11.5px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--gate); background: var(--gate-wash);
+    border: 1px solid var(--gate); border-radius: 999px;
+    padding: 6px 12px 6px 10px;
+  }
+  .back-link {
+    font-family: var(--font-body); font-size: 13.5px; color: var(--muted);
+    text-decoration: none; border: 1px solid var(--border-2); border-radius: 7px; padding: 7px 12px;
+  }
+  .back-link:hover { color: var(--ink); background: var(--surface-2); }
+
+  .subhead { max-width: 1180px; margin: 0 auto; padding: 0 28px 22px; color: var(--muted); font-size: 13.5px; max-width: 62ch; }
+
+  section { margin-bottom: 40px; }
+  .section-label {
+    font-family: var(--font-display); font-weight: 600; font-size: 12px;
+    letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px;
+  }
+
+  .bible-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 22px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px;
+  }
+  .bible-card h3 {
+    font-family: var(--font-display); font-size: 12px; font-weight: 600;
+    letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px;
+  }
+  .bible-card p { margin: 0; font-size: 14px; }
+  .bible-card .site { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  .card-list { display: flex; flex-direction: column; gap: 12px; }
+  .item-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 15px 17px; }
+  .item-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 7px; }
+  .item-title { font-family: var(--font-display); font-weight: 600; font-size: 14.5px; }
+  .item-body { font-size: 13.5px; color: var(--muted); margin: 0 0 8px; }
+  .item-meta { display: flex; flex-wrap: wrap; gap: 6px 8px; font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+  .item-meta .code { background: var(--surface-2); border-radius: 5px; padding: 2px 6px; }
+  .item-meta a { color: var(--muted); }
+  .item-meta a:hover { color: var(--accent); }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px; flex: none;
+    font-family: var(--font-display); font-weight: 600; font-size: 10.5px;
+    letter-spacing: 0.05em; text-transform: uppercase; border-radius: 999px; padding: 3px 9px; white-space: nowrap;
+  }
+  .pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .pill.active { color: var(--status-active); background: var(--status-active-wash); }
+  .pill.active .dot { background: var(--status-active); }
+  .pill.hold { color: var(--status-hold); background: var(--status-hold-wash); }
+  .pill.hold .dot { background: var(--status-hold); }
+  .pill.done { color: var(--status-done); background: var(--status-done-wash); }
+  .pill.done .dot { background: var(--status-done); }
+
+  .plan-header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 14px; }
+  .plan-date { font-family: var(--font-mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .plan-scope { font-size: 13.5px; color: var(--muted); }
+  .plan-scope b { color: var(--ink); font-weight: 600; }
+
+  .angle-list { display: flex; flex-direction: column; gap: 10px; }
+  .angle { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+  .angle.picked { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent-wash); }
+  .angle-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+  .angle-title { font-family: var(--font-display); font-weight: 600; font-size: 15px; margin: 0 0 4px; text-wrap: balance; }
+  .angle-pitch { font-size: 13.5px; color: var(--muted); margin: 0; max-width: 62ch; }
+
+  .status-chip {
+    flex: none; font-family: var(--font-display); font-weight: 600; font-size: 10.5px;
+    letter-spacing: 0.05em; text-transform: uppercase; border-radius: 999px; padding: 4px 10px;
+    border: 1px solid var(--border-2); color: var(--muted);
+  }
+  .status-chip.picked { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
+
+  .angle-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
+  .tag { font-family: var(--font-mono); font-size: 11px; color: var(--muted); background: var(--surface-2); border-radius: 5px; padding: 3px 7px; }
+  .tag.topic { color: var(--accent); background: var(--accent-wash); }
+  .tag a { color: inherit; text-decoration: none; }
+  .tag a:hover { text-decoration: underline; }
+
+  .rationale { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; gap: 12px; align-items: flex-start; }
+  .rationale.none { color: var(--muted); font-size: 12.5px; font-style: italic; }
+  .rationale-text { font-size: 12.5px; color: var(--muted); }
+  .rationale-text b { color: var(--ink); font-weight: 600; }
+  .rationale-text .pattern { display: block; margin-top: 5px; font-style: italic; }
+
+  @media (max-width: 760px) {
+    .bible-card { grid-template-columns: 1fr; gap: 14px; }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <span class="mark">ISOGREEN</span>
+      <span class="sep">/</span>
+      <span class="page-name">Content Planning</span>
+    </div>
+    <div class="top-actions">
+      <span class="gate-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+        Internal — not in client report
+      </span>
+    </div>
+  </div>
+  <p class="subhead">Reads from ISOGREEN's bible, topics, and project files. Proposed angles pull past-performance scoring from the video-analysis pipeline where it exists.</p>
+</header>
+
+<div class="shell">
+
+  <section>
+    <p class="section-label">Bible</p>
+    <div class="bible-card">
+      <div>
+        <h3>Area of expertise</h3>
+        <p>Blown-in insulation materials (Isofiber cellulose, Isofulg basalt wool, imported wood fiber). Positions installation quality as equally important as thermal coefficient; offers an online sizing calculator and technical explainer content.</p>
+      </div>
+      <div>
+        <h3>Target audience</h3>
+        <p>Homeowners/self-builders and contractors building nZEB or passive houses, plus architects/consultants. Technically curious, price-comparing insulation options.</p>
+      </div>
+      <div>
+        <h3>Tone of voice</h3>
+        <p>Romanian, "noi", expert/technical-explainer register. Myth-busting hooks, precise numbers, health/comfort framing over pure energy-bill savings.</p>
+        <p class="site" style="margin-top:8px;">isogreen.eu</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Topics section omitted entirely — ISOGREEN has zero Topics onboarded yet. -->
+
+  <section>
+    <p class="section-label">Projects</p>
+    <div class="card-list">
+      <div class="item-card">
+        <div class="item-head">
+          <span class="item-title">Potlogi — Izolație Acoperiș Casă Pasivă (CLT)</span>
+          <span class="pill active"><span class="dot"></span>Active</span>
+        </div>
+        <p class="item-body">Roof insulation for a CLT Passive House build — 25cm→40cm double-sided structural beam extension, Isofiber+ cellulose (40cm), Eurovent membranes + Airstop airtightness tape. Blower Door verification test pending.</p>
+        <div class="item-meta"><a href="https://app.notion.com/p/3ba40c120f0781d3bde7eb78aac482d6" target="_blank" rel="noopener">View in Notion ↗</a></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="section-label">Content plans</p>
+
+    <div class="plan-header">
+      <span class="plan-date">2026-08-13</span>
+      <span class="plan-scope">Scope: <b>Potlogi project (roof insulation, CLT Passive House build)</b></span>
+    </div>
+
+    <div class="angle-list">
+
+      <div class="angle">
+        <div class="angle-top">
+          <div>
+            <p class="angle-title">De ce am dublat grinzile de 25cm în loc să punem izolație mai groasă deasupra</p>
+            <p class="angle-pitch">Counter-intuitive structural decision, explained.</p>
+          </div>
+          <span class="status-chip">Not picked</span>
+        </div>
+        <div class="angle-tags"><span class="tag">Potlogi — structural adaptation (25cm → 40cm)</span></div>
+        <div class="rationale">
+          <div class="rationale-text">"Taiem membrana proaspat montata? | Dumbrava" — Hook 8, ~4x baseline, 90.6% Facebook hook rate.<span class="pattern">Superseded by angle "Nu poți pune 40cm de izolație..." below once the vapor-barrier-only footage constraint was known.</span></div>
+        </div>
+      </div>
+
+      <div class="angle">
+        <div class="angle-top">
+          <div>
+            <p class="angle-title">Cum am ajuns la 40cm de izolație pe un acoperiș CLT la Potlogi</p>
+            <p class="angle-pitch">Real project case-study walkthrough with specific numbers + step-matched b-roll.</p>
+          </div>
+          <span class="status-chip">Not picked</span>
+        </div>
+        <div class="angle-tags"><span class="tag">Potlogi — full spec (CLT, Passive House, 25→40cm, Isofiber+)</span></div>
+        <div class="rationale">
+          <div class="rationale-text">"Despre proiect - Afumati" — Hook 8, ~3.8x baseline, highest comment count in the batch.<span class="pattern">Original framing assumed process footage that doesn't exist; reframed and picked as "Cum arată un acoperiș pasiv finalizat..." below.</span></div>
+        </div>
+      </div>
+
+      <div class="angle">
+        <div class="angle-top">
+          <div>
+            <p class="angle-title">Cost breakdown for 40cm Isofiber+ at Potlogi</p>
+            <p class="angle-pitch">Screen-recorded on the izogreen.eu calculator.</p>
+          </div>
+          <span class="status-chip">Not picked</span>
+        </div>
+        <div class="angle-tags"><span class="tag">Potlogi — insulation spec + calculator</span></div>
+        <div class="rationale">
+          <div class="rationale-text">"Cat costa cu adevarat vata bazaltica la rola vs suflata" — Hook 8, Structure 9, CTA 9, ~3.7x baseline.<span class="pattern">Blocked — no real cost figures for Potlogi yet; independently revisitable once available.</span></div>
+        </div>
+      </div>
+
+      <div class="angle">
+        <div class="angle-top">
+          <div>
+            <p class="angle-title">De ce tăiem banda proaspăt montată la Potlogi</p>
+            <p class="angle-pitch">Visual demo of a seemingly-destructive cutting/trimming step during airtightness sealing.</p>
+          </div>
+          <span class="status-chip">Not picked</span>
+        </div>
+        <div class="angle-tags"><span class="tag">Potlogi — Eurovent/Airstop sealing work</span></div>
+        <div class="rationale">
+          <div class="rationale-text">"Taiem membrana proaspat montata? | Dumbrava" — Hook 8, ~4x baseline, 90.6% Facebook hook rate.<span class="pattern">Reframed as "De ce tăiem banda proaspăt montată" below — same angle, confirmed filmable.</span></div>
+        </div>
+      </div>
+
+      <div class="angle">
+        <div class="angle-top">
+          <div>
+            <p class="angle-title">De ce transpiră mansarda vara dacă nu ai defazaj termic suficient</p>
+            <p class="angle-pitch">Thermal phase-shift benefit of the cellulose insulation, applied to Potlogi's roof.</p>
+          </div>
+          <span class="status-chip">Not picked</span>
+        </div>
+        <div class="angle-tags"><span class="tag">Potlogi — 40cm Isofiber+ (thermal phase-shift)</span></div>
+        <div class="rationale">
+          <div class="rationale-text">Honest downside: "Celuloza si defazajul termic" underperformed baseline (41% of baseline) despite strong hook craft (70.3% Facebook hook rate).<span class="pattern">Lower-confidence pick; insulation itself not visible in available footage.</span></div>
+        </div>
+      </div>
+
+      <div class="angle">
+        <div class="angle-top">
+          <div>
+            <p class="angle-title">Rapid-fire knowledge quiz</p>
+            <p class="angle-pitch">Built from real Potlogi facts.</p>
+          </div>
+          <span class="status-chip">Not picked</span>
+        </div>
+        <div class="angle-tags"><span class="tag">Potlogi — general technical facts</span></div>
+        <div class="rationale">
+          <div class="rationale-text">"Rapid Fire - Verifică-ți cunoștințele" — Hook 8, Pacing 9, ~1.7x baseline.<span class="pattern">Weaker fit for a single-shoot, single-visible-layer session; worth revisiting later.</span></div>
+        </div>
+      </div>
+
+      <div class="angle">
+        <div class="angle-top">
+          <div>
+            <p class="angle-title">Live Blower Door test reveal</p>
+            <p class="angle-pitch">At Potlogi.</p>
+          </div>
+          <span class="status-chip">Not picked</span>
+        </div>
+        <div class="angle-tags"><span class="tag">Potlogi — pending verification milestone</span></div>
+        <div class="rationale none">No performance data for this angle — infeasible, the Blower Door test will not be filmed for this project.</div>
+      </div>
+
+      <div class="angle picked">
+        <div class="angle-top">
+          <div>
+            <p class="angle-title">Nu poți sări peste bariera de vapori</p>
+            <p class="angle-pitch">Myth-bust on why the vapor barrier isn't optional.</p>
+          </div>
+          <span class="status-chip picked">Picked</span>
+        </div>
+        <div class="angle-tags"><span class="tag">Potlogi — airtightness system (visible in tomorrow's shoot)</span></div>
+        <div class="rationale">
+          <div class="rationale-text"><b>ISOGREEN's strongest performer in the entire Video Analysis dataset</b> — "Izolatia din celuloza nu e mancata de rozatoare" (Hook 9, ~12x baseline / 146k vs ~11.8k, direct on-screen viewer objection + tight rebuttal, no CTA needed).</div>
+        </div>
+      </div>
+
+      <div class="angle picked">
+        <div class="angle-top">
+          <div>
+            <p class="angle-title">De ce tăiem banda proaspăt montată</p>
+            <p class="angle-pitch">Visual demo cutting/trimming the Airstop tape during tomorrow's shoot.</p>
+          </div>
+          <span class="status-chip picked">Picked</span>
+        </div>
+        <div class="angle-tags"><span class="tag">Potlogi — same airtightness work, direct match to the shoot</span></div>
+        <div class="rationale">
+          <div class="rationale-text"><b>"Taiem membrana proaspat montata? | Dumbrava"</b> — Hook 8, ~4x baseline, 90.6% Facebook hook rate. Same technique, different site — real precedent, not a guess.</div>
+        </div>
+      </div>
+
+      <div class="angle picked">
+        <div class="angle-top">
+          <div>
+            <p class="angle-title">Nu poți pune 40cm de izolație fără să slăbești acoperișul</p>
+            <p class="angle-pitch">Myth-bust on the structural solution, narrated over the vapor-barrier footage.</p>
+          </div>
+          <span class="status-chip picked">Picked</span>
+        </div>
+        <div class="angle-tags"><span class="tag">Potlogi — 25→40cm double-sided structural extension</span></div>
+        <div class="rationale">
+          <div class="rationale-text"><b>Same top-performer pattern</b> as "Nu poți sări peste bariera de vapori" — direct objection, spoken rebuttal, doesn't require showing the now-hidden structure itself.</div>
+        </div>
+      </div>
+
+      <div class="angle picked">
+        <div class="angle-top">
+          <div>
+            <p class="angle-title">Cum arată un acoperiș pasiv finalizat la Potlogi</p>
+            <p class="angle-pitch">Real-project case-study reveal, vapor barrier as the visible "finished layer," citing the full spec.</p>
+          </div>
+          <span class="status-chip picked">Picked</span>
+        </div>
+        <div class="angle-tags"><span class="tag">Potlogi — full project facts</span></div>
+        <div class="rationale">
+          <div class="rationale-text"><b>"Despre proiect - Afumati"</b> — Hook 8, ~3.8x baseline, highest comment count in the batch. Real numbers + real footage format, reframed to fit the finished-state-only footage available.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
