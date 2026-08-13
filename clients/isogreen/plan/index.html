@@ -393,6 +393,7 @@
   var CLIENT = "isogreen";
   var bibleStatusEl = document.getElementById("bibleStatus");
   var topicsStatusEl = document.getElementById("topicsStatus");
+  var topicsListEl = document.getElementById("topicsList");
 
   function setBibleStatus(text, cls) {
     bibleStatusEl.textContent = text;
@@ -402,9 +403,12 @@
     topicsStatusEl.textContent = text;
     topicsStatusEl.className = cls || "soon-tag";
   }
+  function escapeHtml(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
 
   // --- Bible text fields (textareas) + inline fields (website) ---
-  Array.prototype.forEach.call(document.querySelectorAll(".bible-field, .bible-field-inline"), function (field) {
+  function wireBibleField(field) {
     var lastSaved = field.value;
     field.addEventListener("blur", function () {
       var value = field.value;
@@ -431,7 +435,8 @@
           setBibleStatus("eroare de rețea — reîncearcă", "err");
         });
     });
-  });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".bible-field, .bible-field-inline"), wireBibleField);
 
   // --- File attachments (audience / tone-of-voice reference files) ---
   Array.prototype.forEach.call(document.querySelectorAll(".file-attach"), function (wrap) {
@@ -464,8 +469,9 @@
     });
   });
 
-  // --- Topics: edit existing (Name / Applies when) ---
-  Array.prototype.forEach.call(document.querySelectorAll(".topic-card"), function (card) {
+  // --- Topics: edit existing (Name / Applies when), reusable for both
+  //     statically-rendered cards and cards built from live data ---
+  function wireTopicCard(card) {
     var pageId = card.dataset.pageId;
     Array.prototype.forEach.call(card.querySelectorAll(".topic-name, .topic-applies"), function (field) {
       var lastSaved = field.value;
@@ -492,7 +498,20 @@
           });
       });
     });
-  });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".topic-card"), wireTopicCard);
+
+  function buildTopicCard(pageId, name, appliesWhen, videoCount) {
+    var card = document.createElement("div");
+    card.className = "item-card topic-card";
+    card.dataset.pageId = pageId;
+    card.innerHTML =
+      '<input class="topic-name" data-field="Name" value="' + escapeHtml(name) + '" />' +
+      '<textarea class="topic-applies" data-field="Applies when">' + escapeHtml(appliesWhen) + '</textarea>' +
+      '<div class="item-meta"><span>' + videoCount + ' videoclipuri</span></div>';
+    wireTopicCard(card);
+    return card;
+  }
 
   // --- Topics: add new ---
   var newTopicForm = document.getElementById("newTopicForm");
@@ -512,29 +531,7 @@
       .then(function (data) {
         if (data && data.ok && data.page_id) {
           setTopicsStatus("adăugat în Notion", "ok");
-          var card = document.createElement("div");
-          card.className = "item-card topic-card";
-          card.dataset.pageId = data.page_id;
-          card.innerHTML =
-            '<input class="topic-name" data-field="Name" value="' + name.replace(/"/g, "&quot;") + '" />' +
-            '<textarea class="topic-applies" data-field="Applies when">' + appliesInput.value.replace(/</g, "&lt;") + '</textarea>' +
-            '<div class="item-meta"><span>0 videoclipuri</span></div>';
-          document.getElementById("topicsList").appendChild(card);
-          Array.prototype.forEach.call(card.querySelectorAll(".topic-name, .topic-applies"), function (field) {
-            var lastSaved = field.value;
-            field.addEventListener("blur", function () {
-              var value = field.value;
-              if (value === lastSaved) return;
-              fetch("/planning-api/topics-save.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ client: CLIENT, action: "update", page_id: data.page_id, field: field.dataset.field, value: value })
-              }).then(function (r) { return r.json(); }).then(function (d) {
-                if (d && d.ok) { lastSaved = value; setTopicsStatus("salvat în Notion", "ok"); }
-                else { setTopicsStatus("eroare la salvare — reîncearcă", "err"); }
-              });
-            });
-          });
+          topicsListEl.appendChild(buildTopicCard(data.page_id, name, appliesInput.value, 0));
           nameInput.value = "";
           appliesInput.value = "";
         } else {
@@ -545,6 +542,53 @@
         setTopicsStatus("eroare de rețea — reîncearcă", "err");
       });
   });
+
+  // --- Refresh with live Notion data on load, so edits made by anyone
+  //     (including outside this browser tab) always show up, instead of
+  //     the static snapshot baked in at last render time. Falls back to
+  //     the static content already on the page if this fetch fails. ---
+  fetch("/planning-api/client-data.php?client=" + encodeURIComponent(CLIENT))
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (!data || !data.ok) return;
+
+      if (data.bible) {
+        var map = {
+          "Area of expertise": data.bible.areaOfExpertise,
+          "Target audience": data.bible.targetAudience,
+          "Tone of voice": data.bible.toneOfVoice,
+          "Website": data.bible.website
+        };
+        Array.prototype.forEach.call(document.querySelectorAll(".bible-field, .bible-field-inline"), function (field) {
+          var live = map[field.dataset.field];
+          if (typeof live === "string") field.value = live;
+        });
+        var fileHint = function (wrap, names) {
+          var statusSpan = wrap.querySelector(".file-status");
+          if (names && names.length && !statusSpan.textContent) {
+            statusSpan.textContent = "curent: " + names.join(", ");
+            statusSpan.className = "file-status";
+          }
+        };
+        var taWrap = document.querySelector('.file-attach[data-field="Target audience files"]');
+        var tvWrap = document.querySelector('.file-attach[data-field="Tone of voice files"]');
+        if (taWrap) fileHint(taWrap, data.bible.targetAudienceFiles);
+        if (tvWrap) fileHint(tvWrap, data.bible.toneOfVoiceFiles);
+      }
+
+      if (data.topics && data.topics.length) {
+        topicsListEl.innerHTML = "";
+        data.topics.forEach(function (t) {
+          topicsListEl.appendChild(buildTopicCard(t.pageId, t.name, t.appliesWhen, t.videoCount));
+        });
+      }
+
+      setBibleStatus("sincronizat cu Notion", "ok");
+      setTopicsStatus("sincronizat cu Notion", "ok");
+    })
+    .catch(function () {
+      // Static content already on the page stays as a fallback.
+    });
 })();
 </script>
 </body>
