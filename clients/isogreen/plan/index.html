@@ -240,6 +240,8 @@
         <div class="file-attach" data-field="Tone of voice files">
           <label class="file-label">Fișier de referință <span id="fileStatus_TV" class="file-status"></span></label>
           <input type="file" class="file-input" />
+          <label class="file-label" style="margin-top: 8px;">Link folder cu referințe (Drive etc.)</label>
+          <input type="text" class="bible-field-inline site" data-field="Tone of voice reference link" placeholder="https://drive.google.com/..." value="" />
         </div>
         <input type="text" class="bible-field-inline site" data-field="Website" value="https://www.isogreen.eu" />
       </div>
@@ -557,7 +559,8 @@
           "Area of expertise": data.bible.areaOfExpertise,
           "Target audience": data.bible.targetAudience,
           "Tone of voice": data.bible.toneOfVoice,
-          "Website": data.bible.website
+          "Website": data.bible.website,
+          "Tone of voice reference link": data.bible.toneOfVoiceReferenceLink
         };
         Array.prototype.forEach.call(document.querySelectorAll(".bible-field, .bible-field-inline"), function (field) {
           var live = map[field.dataset.field];
