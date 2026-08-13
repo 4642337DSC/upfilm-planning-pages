@@ -106,6 +106,18 @@
   .bible-field.saving { opacity: 0.6; }
   #bibleStatus.err { color: var(--gate); background: var(--gate-wash); }
   #bibleStatus.ok { color: var(--status-active); background: var(--status-active-wash); }
+  .bible-field-inline.site {
+    display: block; width: 100%; margin-top: 8px; font-family: var(--font-mono); font-size: 12.5px;
+    color: var(--muted); background: transparent; border: 1px solid transparent; border-radius: 6px; padding: 4px 6px;
+  }
+  .bible-field-inline.site:hover { border-color: var(--border-2); }
+  .bible-field-inline.site:focus { outline: none; border-color: var(--accent); background: var(--surface-2); color: var(--ink); }
+  .file-attach { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-2); }
+  .file-label { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--muted); margin-bottom: 6px; }
+  .file-status { font-size: 10.5px; }
+  .file-status.ok { color: var(--status-active); }
+  .file-status.err { color: var(--gate); }
+  .file-input { font-size: 12px; color: var(--muted); max-width: 100%; }
 
   /* Main layout: videos-in-planning (left, wide) + sidebar (right, projects + topics) */
   .layout { display: grid; grid-template-columns: 1.7fr 1fr; gap: 24px; align-items: start; }
@@ -149,10 +161,35 @@
     background: var(--surface); border: 1px dashed var(--border-2); border-radius: 12px;
     padding: 16px 17px; font-size: 13.5px; color: var(--muted);
   }
-  .add-btn {
-    margin-top: 10px; font-family: var(--font-body); font-size: 12.5px; color: var(--muted);
-    background: none; border: 1px dashed var(--border-2); border-radius: 7px; padding: 7px 12px; cursor: not-allowed;
+  .topic-card { display: flex; flex-direction: column; gap: 6px; }
+  .topic-name {
+    font-family: var(--font-display); font-weight: 600; font-size: 14px; color: var(--ink);
+    background: transparent; border: 1px solid transparent; border-radius: 6px; padding: 3px 5px; margin: -3px -5px;
   }
+  .topic-name:hover { border-color: var(--border-2); }
+  .topic-name:focus { outline: none; border-color: var(--accent); background: var(--surface-2); }
+  .topic-applies {
+    font-family: var(--font-body); font-size: 12.5px; color: var(--muted); line-height: 1.45;
+    background: transparent; border: 1px solid transparent; border-radius: 6px; padding: 4px 5px; margin: 0 -5px;
+    resize: vertical; min-height: 54px;
+  }
+  .topic-applies:hover { border-color: var(--border-2); }
+  .topic-applies:focus { outline: none; border-color: var(--accent); background: var(--surface-2); }
+  .new-topic-form {
+    margin-top: 10px; background: var(--surface); border: 1px dashed var(--border-2); border-radius: 12px;
+    padding: 13px 15px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .new-topic-form input, .new-topic-form textarea {
+    font-family: var(--font-body); font-size: 13px; color: var(--ink);
+    background: var(--surface-2); border: 1px solid var(--border-2); border-radius: 7px; padding: 7px 9px;
+  }
+  .new-topic-form textarea { min-height: 50px; resize: vertical; }
+  .add-btn-active {
+    font-family: var(--font-display); font-weight: 600; font-size: 12.5px;
+    color: var(--accent-ink); background: var(--accent); border: none;
+    border-radius: 7px; padding: 8px 14px; cursor: pointer; align-self: flex-start;
+  }
+  .add-btn-active:hover { opacity: 0.9; }
 
   footer.page-footer {
     margin-top: 32px; padding-top: 18px; border-top: 1px solid var(--border);
@@ -192,11 +229,19 @@
       <div>
         <h3>Public țintă</h3>
         <textarea class="bible-field" data-field="Target audience">Proprietari/autoconstructori și echipele lor care construiesc case nZEB sau pasive (structură din lemn, metal sau zidărie), plus arhitecți/consultanți întâlniți la evenimente de profil. Public tehnic curios, care compară prețuri — conținutul presupune un interes minim în fizica construcțiilor (valori U, bariere de vapori, etanșeitate la aer), nu publicul larg.</textarea>
+        <div class="file-attach" data-field="Target audience files">
+          <label class="file-label">Fișier de referință <span id="fileStatus_TA" class="file-status"></span></label>
+          <input type="file" class="file-input" />
+        </div>
       </div>
       <div>
         <h3>Ton al vocii</h3>
         <textarea class="bible-field" data-field="Tone of voice">Română, persoana I plural („noi”), registru expert/tehnic-explicativ. Hook-uri de tip mit-bustat sau întrebare retorică. Accent puternic pe cifre precise (coeficienți, cm de izolație, lei/m², ore de defazaj termic) — nu generalizează niciodată afirmațiile tehnice. Încadrează produsul ca protecție pentru sănătate/confort, nu doar pentru factura la energie. CTA implicit: „urmărește-ne”, uneori un CTA direct către calculator (izogreen.eu).</textarea>
-        <p class="site">isogreen.eu</p>
+        <div class="file-attach" data-field="Tone of voice files">
+          <label class="file-label">Fișier de referință <span id="fileStatus_TV" class="file-status"></span></label>
+          <input type="file" class="file-input" />
+        </div>
+        <input type="text" class="bible-field-inline site" data-field="Website" value="https://www.isogreen.eu" />
       </div>
     </div>
   </section>
@@ -274,9 +319,63 @@
       </section>
 
       <section>
-        <p class="section-label">Subiecte <span class="soon-tag">editare — în curând</span></p>
-        <div class="empty-note">Niciun subiect adăugat încă pentru ISOGREEN.</div>
-        <button class="add-btn" disabled>+ Adaugă subiect</button>
+        <p class="section-label">Subiecte <span id="topicsStatus" class="soon-tag">generate din istoricul real de videoclipuri</span></p>
+        <div id="topicsList" class="card-list">
+
+          <div class="item-card topic-card" data-page-id="3bb40c120f0781e994eef8c9ee52f299">
+            <input class="topic-name" data-field="Name" value="Siguranță la foc și rozătoare" />
+            <textarea class="topic-applies" data-field="Applies when">Proiectul folosește Isofiber/celuloză sau Isofulg și publicul se poate întreba despre siguranța materialului la foc sau la atacul rozătoarelor.</textarea>
+            <div class="item-meta"><span>5 videoclipuri</span></div>
+          </div>
+
+          <div class="item-card topic-card" data-page-id="3bb40c120f0781cb89ecd4e99bf246a6">
+            <input class="topic-name" data-field="Name" value="Defazaj termic și confort vara" />
+            <textarea class="topic-applies" data-field="Applies when">Proiectul are grosime mare de izolație din celuloză și se poate vorbi despre protecția la supraîncălzire vara / răcoare în pod.</textarea>
+            <div class="item-meta"><span>5 videoclipuri</span></div>
+          </div>
+
+          <div class="item-card topic-card" data-page-id="3bb40c120f078105a118fa6c863752c8">
+            <input class="topic-name" data-field="Name" value="Bariera de vapori și etanșeitate" />
+            <textarea class="topic-applies" data-field="Applies when">Proiectul are montată o barieră de vapori sau lucrări de etanșeitate vizibile în filmarea disponibilă.</textarea>
+            <div class="item-meta"><span>6 videoclipuri</span></div>
+          </div>
+
+          <div class="item-card topic-card" data-page-id="3bb40c120f0781cd9cfccd1fa89438af">
+            <input class="topic-name" data-field="Name" value="Comparație materiale izolatoare" />
+            <textarea class="topic-applies" data-field="Applies when">Proiectul poate fi comparat cu alte soluții de izolare (vată la rolă, alte materiale) pentru a justifica alegerea făcută.</textarea>
+            <div class="item-meta"><span>5 videoclipuri</span></div>
+          </div>
+
+          <div class="item-card topic-card" data-page-id="3bb40c120f07818897bec8d5a059bff0">
+            <input class="topic-name" data-field="Name" value="Costuri și eficiență energetică" />
+            <textarea class="topic-applies" data-field="Applies when">Există cifre reale de cost sau consum pentru proiect, sau se poate calcula un ROI/amortizare.</textarea>
+            <div class="item-meta"><span>4 videoclipuri</span></div>
+          </div>
+
+          <div class="item-card topic-card" data-page-id="3bb40c120f078111ae9ce1156aa4c4e5">
+            <input class="topic-name" data-field="Name" value="Umiditate și mucegai" />
+            <textarea class="topic-applies" data-field="Applies when">Proiectul poate ilustra reglarea naturală a umidității de către celuloză sau prevenirea mucegaiului.</textarea>
+            <div class="item-meta"><span>4 videoclipuri</span></div>
+          </div>
+
+          <div class="item-card topic-card" data-page-id="3bb40c120f0781fa9ad9e066878f4c55">
+            <input class="topic-name" data-field="Name" value="Greșeli comune de montaj sau alegere" />
+            <textarea class="topic-applies" data-field="Applies when">Proiectul evidențiază o greșeală tipică de montaj sau de alegere a materialului, evitată sau corectată.</textarea>
+            <div class="item-meta"><span>4 videoclipuri</span></div>
+          </div>
+
+          <div class="item-card topic-card" data-page-id="3bb40c120f0781f0b5ceefb1f7b39149">
+            <input class="topic-name" data-field="Name" value="Certificare și calitate produse" />
+            <textarea class="topic-applies" data-field="Applies when">Se poate sublinia certificarea reală sau calitatea documentată a materialelor folosite în proiect.</textarea>
+            <div class="item-meta"><span>3 videoclipuri</span></div>
+          </div>
+
+        </div>
+        <form id="newTopicForm" class="new-topic-form">
+          <input type="text" id="newTopicName" placeholder="Subiect nou…" />
+          <textarea id="newTopicApplies" placeholder="Se aplică atunci când…"></textarea>
+          <button type="submit" class="add-btn-active">+ Adaugă subiect</button>
+        </form>
       </section>
     </aside>
 
@@ -292,20 +391,26 @@
 (function () {
   "use strict";
   var CLIENT = "isogreen";
-  var statusEl = document.getElementById("bibleStatus");
+  var bibleStatusEl = document.getElementById("bibleStatus");
+  var topicsStatusEl = document.getElementById("topicsStatus");
 
-  function setStatus(text, cls) {
-    statusEl.textContent = text;
-    statusEl.className = cls || "soon-tag";
+  function setBibleStatus(text, cls) {
+    bibleStatusEl.textContent = text;
+    bibleStatusEl.className = cls || "soon-tag";
+  }
+  function setTopicsStatus(text, cls) {
+    topicsStatusEl.textContent = text;
+    topicsStatusEl.className = cls || "soon-tag";
   }
 
-  Array.prototype.forEach.call(document.querySelectorAll(".bible-field"), function (field) {
+  // --- Bible text fields (textareas) + inline fields (website) ---
+  Array.prototype.forEach.call(document.querySelectorAll(".bible-field, .bible-field-inline"), function (field) {
     var lastSaved = field.value;
     field.addEventListener("blur", function () {
       var value = field.value;
       if (value === lastSaved) return; // nothing changed, don't spam a save
       field.classList.add("saving");
-      setStatus("se salvează…", "soon-tag");
+      setBibleStatus("se salvează…", "soon-tag");
       fetch("/planning-api/bible-save.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -316,16 +421,129 @@
           field.classList.remove("saving");
           if (data && data.ok) {
             lastSaved = value;
-            setStatus("salvat în Notion", "ok");
+            setBibleStatus("salvat în Notion", "ok");
           } else {
-            setStatus("eroare la salvare — reîncearcă", "err");
+            setBibleStatus("eroare la salvare — reîncearcă", "err");
           }
         })
         .catch(function () {
           field.classList.remove("saving");
-          setStatus("eroare de rețea — reîncearcă", "err");
+          setBibleStatus("eroare de rețea — reîncearcă", "err");
         });
     });
+  });
+
+  // --- File attachments (audience / tone-of-voice reference files) ---
+  Array.prototype.forEach.call(document.querySelectorAll(".file-attach"), function (wrap) {
+    var input = wrap.querySelector(".file-input");
+    var statusSpan = wrap.querySelector(".file-status");
+    input.addEventListener("change", function () {
+      if (!input.files || !input.files[0]) return;
+      var file = input.files[0];
+      statusSpan.textContent = "se încarcă…";
+      statusSpan.className = "file-status";
+      var formData = new FormData();
+      formData.append("client", CLIENT);
+      formData.append("field", wrap.dataset.field);
+      formData.append("file", file);
+      fetch("/planning-api/file-upload.php", { method: "POST", body: formData })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (data && data.ok) {
+            statusSpan.textContent = "atașat: " + data.filename;
+            statusSpan.className = "file-status ok";
+          } else {
+            statusSpan.textContent = "eroare la încărcare";
+            statusSpan.className = "file-status err";
+          }
+        })
+        .catch(function () {
+          statusSpan.textContent = "eroare de rețea";
+          statusSpan.className = "file-status err";
+        });
+    });
+  });
+
+  // --- Topics: edit existing (Name / Applies when) ---
+  Array.prototype.forEach.call(document.querySelectorAll(".topic-card"), function (card) {
+    var pageId = card.dataset.pageId;
+    Array.prototype.forEach.call(card.querySelectorAll(".topic-name, .topic-applies"), function (field) {
+      var lastSaved = field.value;
+      field.addEventListener("blur", function () {
+        var value = field.value;
+        if (value === lastSaved) return;
+        setTopicsStatus("se salvează…", "soon-tag");
+        fetch("/planning-api/topics-save.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ client: CLIENT, action: "update", page_id: pageId, field: field.dataset.field, value: value })
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (data && data.ok) {
+              lastSaved = value;
+              setTopicsStatus("salvat în Notion", "ok");
+            } else {
+              setTopicsStatus("eroare la salvare — reîncearcă", "err");
+            }
+          })
+          .catch(function () {
+            setTopicsStatus("eroare de rețea — reîncearcă", "err");
+          });
+      });
+    });
+  });
+
+  // --- Topics: add new ---
+  var newTopicForm = document.getElementById("newTopicForm");
+  newTopicForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var nameInput = document.getElementById("newTopicName");
+    var appliesInput = document.getElementById("newTopicApplies");
+    var name = nameInput.value.trim();
+    if (!name) return;
+    setTopicsStatus("se adaugă…", "soon-tag");
+    fetch("/planning-api/topics-save.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ client: CLIENT, action: "create", name: name, applies_when: appliesInput.value })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data && data.ok && data.page_id) {
+          setTopicsStatus("adăugat în Notion", "ok");
+          var card = document.createElement("div");
+          card.className = "item-card topic-card";
+          card.dataset.pageId = data.page_id;
+          card.innerHTML =
+            '<input class="topic-name" data-field="Name" value="' + name.replace(/"/g, "&quot;") + '" />' +
+            '<textarea class="topic-applies" data-field="Applies when">' + appliesInput.value.replace(/</g, "&lt;") + '</textarea>' +
+            '<div class="item-meta"><span>0 videoclipuri</span></div>';
+          document.getElementById("topicsList").appendChild(card);
+          Array.prototype.forEach.call(card.querySelectorAll(".topic-name, .topic-applies"), function (field) {
+            var lastSaved = field.value;
+            field.addEventListener("blur", function () {
+              var value = field.value;
+              if (value === lastSaved) return;
+              fetch("/planning-api/topics-save.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ client: CLIENT, action: "update", page_id: data.page_id, field: field.dataset.field, value: value })
+              }).then(function (r) { return r.json(); }).then(function (d) {
+                if (d && d.ok) { lastSaved = value; setTopicsStatus("salvat în Notion", "ok"); }
+                else { setTopicsStatus("eroare la salvare — reîncearcă", "err"); }
+              });
+            });
+          });
+          nameInput.value = "";
+          appliesInput.value = "";
+        } else {
+          setTopicsStatus("eroare la adăugare — reîncearcă", "err");
+        }
+      })
+      .catch(function () {
+        setTopicsStatus("eroare de rețea — reîncearcă", "err");
+      });
   });
 })();
 </script>
