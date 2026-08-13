@@ -10,7 +10,7 @@ make public.
 ## Layout
 
 ```
-clients/<slug>/planning/index.html
+clients/<slug>/plan/index.html
 ```
 
 Each file is a self-contained static HTML page — no build step, no
