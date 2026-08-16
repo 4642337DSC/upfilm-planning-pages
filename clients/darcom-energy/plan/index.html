@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Darcom Energy Content Planning</title>
+<style>
+  :root {
+    --bg:        #f9f9f7;
+    --surface:   #fcfcfb;
+    --surface-2: #f3f2ee;
+    --ink:       #17140f;
+    --muted:     #726c5e;
+    --border:    rgba(23,20,15,0.10);
+    --border-2:  rgba(23,20,15,0.17);
+    --accent:    #5b3fae;
+    --accent-ink:#ffffff;
+    --accent-wash: rgba(91,63,174,0.08);
+    --gate:      #9a6a1f;
+    --gate-wash: rgba(154,106,31,0.10);
+    --status-active: #3d7a5c;
+    --status-active-wash: rgba(61,122,92,0.10);
+    --status-hold: #a3671e;
+    --status-hold-wash: rgba(163,103,30,0.10);
+    --status-done: #5b6a8a;
+    --status-done-wash: rgba(91,106,138,0.10);
+    --score-hi: #3d7a5c;
+    --score-mid: #8a7a3d;
+    --score-lo: #a3541e;
+
+    --font-display: "Acre", -apple-system, "Segoe UI Semibold", "Helvetica Neue", Arial, sans-serif;
+    --font-body:    "Acre", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    --font-mono:    "Cascadia Code", "SF Mono", Consolas, "Roboto Mono", ui-monospace, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:        #0d0d0c;
+      --surface:   #1a1a18;
+      --surface-2: #232320;
+      --ink:       #f1efe9;
+      --muted:     #9a9488;
+      --border:    rgba(255,255,255,0.10);
+      --border-2:  rgba(255,255,255,0.18);
+      --accent:    #8f7fe0;
+      --accent-ink:#0d0d0c;
+      --accent-wash: rgba(143,127,224,0.14);
+      --gate:      #d9a94a;
+      --gate-wash: rgba(217,169,74,0.13);
+      --status-active: #6fbf96;
+      --status-active-wash: rgba(111,191,150,0.14);
+      --status-hold: #d9a15a;
+      --status-hold-wash: rgba(217,161,90,0.14);
+      --status-done: #93a3c9;
+      --status-done-wash: rgba(147,163,201,0.14);
+      --score-hi: #6fbf96;
+      --score-mid: #cbb96b;
+      --score-lo: #d98a5a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:        #0d0d0c;
+    --surface:   #1a1a18;
+    --surface-2: #232320;
+    --ink:       #f1efe9;
+    --muted:     #9a9488;
+    --border:    rgba(255,255,255,0.10);
+    --border-2:  rgba(255,255,255,0.18);
+    --accent:    #8f7fe0;
+    --accent-ink:#0d0d0c;
+    --accent-wash: rgba(143,127,224,0.14);
+    --gate:      #d9a94a;
+    --gate-wash: rgba(217,169,74,0.13);
+    --status-active: #6fbf96;
+    --status-active-wash: rgba(111,191,150,0.14);
+    --status-hold: #d9a15a;
+    --status-hold-wash: rgba(217,161,90,0.14);
+    --status-done: #93a3c9;
+    --status-done-wash: rgba(147,163,201,0.14);
+    --score-hi: #6fbf96;
+    --score-mid: #cbb96b;
+    --score-lo: #d98a5a;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); }
+
+  .shell { max-width: 1180px; margin: 0 auto; padding: 0 28px 80px; }
+
+  header.top { border-bottom: 1px solid var(--border-2); margin-bottom: 28px; }
+  .top-inner {
+    max-width: 1180px; margin: 0 auto; padding: 22px 28px 20px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .brand .mark { font-family: var(--font-display); font-weight: 600; font-size: 20px; letter-spacing: -0.01em; }
+  .brand .sep { color: var(--muted); }
+  .brand .page-name { font-family: var(--font-display); font-weight: 600; font-size: 20px; letter-spacing: -0.01em; color: var(--muted); }
+  .top-actions { display: flex; align-items: center; gap: 10px; }
+  .gate-badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--font-display); font-weight: 600; font-size: 11.5px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--gate); background: var(--gate-wash);
+    border: 1px solid var(--gate); border-radius: 999px;
+    padding: 6px 12px 6px 10px;
+  }
+  .back-link {
+    font-family: var(--font-body); font-size: 13.5px; color: var(--muted);
+    text-decoration: none; border: 1px solid var(--border-2); border-radius: 7px; padding: 7px 12px;
+  }
+  .back-link:hover { color: var(--ink); background: var(--surface-2); }
+
+  .subhead { margin: 0 auto; padding: 0 28px 22px; color: var(--muted); font-size: 13.5px; max-width: 62ch; }
+
+  section { margin-bottom: 40px; }
+  .section-label {
+    font-family: var(--font-display); font-weight: 600; font-size: 12px;
+    letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px;
+  }
+
+  .bible-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 22px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px;
+  }
+  .bible-card h3 {
+    font-family: var(--font-display); font-size: 12px; font-weight: 600;
+    letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px;
+  }
+  .bible-card p { margin: 0; font-size: 14px; }
+  .bible-card .site { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
+
+  .empty-note {
+    background: var(--surface); border: 1px dashed var(--border-2); border-radius: 12px;
+    padding: 16px 18px; font-size: 13.5px; color: var(--muted);
+  }
+
+  @media (max-width: 760px) {
+    .bible-card { grid-template-columns: 1fr; gap: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <span class="mark">DARCOM ENERGY</span>
+      <span class="sep">/</span>
+      <span class="page-name">Content Planning</span>
+    </div>
+    <div class="top-actions">
+      <span class="gate-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+        Internal — not in client report
+      </span>
+      <a class="back-link" href="../">← Dashboard</a>
+    </div>
+  </div>
+  <p class="subhead">Reads from the client's bible, topics, and project files. Proposed angles pull past-performance scoring from the video-analysis pipeline where it exists.</p>
+</header>
+
+<div class="shell">
+
+  <section>
+    <p class="section-label">Bible</p>
+    <div class="bible-card">
+      <div>
+        <h3>Area of expertise</h3>
+        <p>Photovoltaic (solar) systems — ON-GRID, OFF-GRID, HYBRID — for residential, industrial, agricultural, and automotive/marine clients. Family business since 1992, PV-specialized since 2008. Positions itself as a full energy-solutions integrator (in-house design, workshop, service, monitoring) rather than just an installer. Official Victron Energy partner — the only authorized Victron service center in Romania, Moldova, Bulgaria, and Hungary.</p>
+      </div>
+      <div>
+        <h3>Target audience</h3>
+        <p>Residential homeowners considering solar, companies cutting operational costs via renewables, industrial and agricultural businesses, automotive/marine owners (RVs, boats), and professional partners in the renewable energy sector.</p>
+      </div>
+      <div>
+        <h3>Tone of voice</h3>
+        <p>Casual-yet-professional, accessible rather than deeply technical, opportunity-framed. Tagline: “Punem Soarele La Treabă!” (“We put the sun to work!”). Leans on “intelligent”/“automated” systems with 24/7 monitoring as a differentiator.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="section-label">Topics &amp; Projects</p>
+    <div class="empty-note">No Topics or Projects yet — the Notion databases exist but are empty. Content plans need at least one Project or Topic to ground angles in before this section has anything to show.</div>
+  </section>
+
+  <section>
+    <p class="section-label">Content plans</p>
+    <div class="empty-note">No content-plan runs yet for this client.</div>
+  </section>
+
+</div>
+</body>
+</html>
